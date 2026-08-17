@@ -1,0 +1,13 @@
+#pragma once
+
+#define COLOR_BG 0x10a4
+#define COLOR_BG_DARK 0x0841
+#define COLOR_BG_LIGHT 0x18e5
+
+
+#define COLOR_TEXT 0xFFFF
+#define COLOR_TEXT_GRAY 0xFFFF
+
+#define COLOR_PRIMARY 0x15BF
+
+#define COLOR_PROGRESS_BG 0x3186
