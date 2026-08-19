@@ -18,6 +18,6 @@ class BottomBar{
     void drawClock();
     void drawCalendar();
     void drawMediaPlayer();
-    void drawStats();
+    void drawSystem();
 
 };

@@ -32,7 +32,7 @@ struct Layout {
     static const int screenWidth  = 480;
     static const int screenHeight = 320;
     static const int topBarHeight = 32;
-    static const int bottomBarHeight = 60;
+    static const int bottomBarHeight = 46;
 };
 
 #endif

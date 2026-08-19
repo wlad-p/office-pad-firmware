@@ -6,7 +6,7 @@
 void SystemPage::drawStaticLayout()
 {
     _tft.fillScreen(COLOR_BG);
-    BottomBar bottomBar(_tft, 1);
+    BottomBar bottomBar(_tft, 3);
     bottomBar.draw();
 
     TopBar topBar(_tft);
