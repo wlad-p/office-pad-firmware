@@ -25,9 +25,9 @@ private:
 
     void drawStaticLayout();
 
-    void updateCpu(int percent);
-    void updateRam(int current, int total);
-    void updateSwap(int current, int total);
-    void updateStorage(int current, int total);
+    void updateCpu(float percent);
+    void updateRam(float current, float total);
+    void updateSwap(float current, float total);
+    void updateDisk(float current, float total);
   
 };

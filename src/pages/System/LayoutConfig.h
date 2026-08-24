@@ -18,8 +18,8 @@ struct UI
     static const int SWAP_X = 10;
     static const int SWAP_Y = Layout::topBarHeight + 8 + 20 + UI::TILE_HEIGHT + 8;
 
-    static const int STORAGE_X = 245 ;
-    static const int STORAGE_Y = Layout::topBarHeight + 8 + 20 + UI::TILE_HEIGHT + 8;
+    static const int DISK_X = 245 ;
+    static const int DISK_Y = Layout::topBarHeight + 8 + 20 + UI::TILE_HEIGHT + 8;
 
     
 };

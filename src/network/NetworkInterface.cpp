@@ -203,14 +203,16 @@ void NetworkInterface::handleMediaArt(const StaticJsonDocument<512> &doc, UIMana
 }
 void NetworkInterface::handleSystem(const StaticJsonDocument<512> &doc, UIManager &ui)
 {
+
+
     SystemStats _stats;
-    _stats.cpuPercent = doc["cpu_percent"] | 0.0f;
-    _stats.ramTotalBytes = std::stof(doc["ram_total_bytes"] | "0");
-    _stats.ramUsedBytes = std::stof(doc["ram_used_bytes"] | "0");
-    _stats.swapTotalBytes = atoll(doc["swap_total_bytes"] | "0");
-    _stats.swapUsedBytes = atoll(doc["swap_used_bytes"] | "0");
-    _stats.diskTotalBytes = atoll(doc["disk_total_bytes"] | "0");
-    _stats.diskUsedBytes = atoll(doc["disk_used_bytes"] | "0");
+    _stats.cpuPercent = doc["cpu_percent"].as<float>();
+    _stats.ramTotalGB = doc["ram_total_gb"].as<float>();
+    _stats.ramUsedGB = doc["ram_used_gb"].as<float>();
+    _stats.swapTotalGB = doc["swap_total_gb"].as<float>();
+    _stats.swapUsedGB = doc["swap_used_gb"].as<float>();
+    _stats.diskTotalGB = doc["disk_total_gb"].as<float>();
+    _stats.diskUsedGB = doc["disk_used_gb"].as<float>();
     _stats.valid = true;
 
     ui.systemPage().updateStats(_stats);

@@ -3,11 +3,11 @@
 
 struct SystemStats{
     float     cpuPercent      = 0.0f;
-    int64_t ramTotalBytes   = 0;
-    int64_t ramUsedBytes    = 0;
-    int64_t swapTotalBytes  = 0;
-    int64_t swapUsedBytes   = 0;
-    int64_t diskTotalBytes  = 0;
-    int64_t diskUsedBytes   = 0;
+    float ramTotalGB   = 0.0f;
+    float ramUsedGB    = 0.0f;
+    float swapTotalGB  = 0.0f;
+    float swapUsedGB   = 0.0f;
+    float diskTotalGB  = 0.0f;
+    float diskUsedGB   = 0.0f;
     bool    valid           = false;  // true once at least one packet received
 };
