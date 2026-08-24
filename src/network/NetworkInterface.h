@@ -29,11 +29,11 @@ public:
 private:
     static int _currentDurationSec;
 
-    static void sendJson(const StaticJsonDocument<128> &doc);
+    static void sendJson(const JsonDocument &doc);
 
-    static void handleTrack(const StaticJsonDocument<512> &doc,  UIManager &ui);
-    static void handleProgress(const StaticJsonDocument<512> &doc,  UIManager &ui);
-    static void handleMediaArt(const StaticJsonDocument<512> &doc,  UIManager &ui);
-    static void handleSystem(const StaticJsonDocument<512> &doc, UIManager& ui);
-    static void handleClock(const StaticJsonDocument<512> &doc, UIManager& ui);
+    static void handleTrack(const JsonDocument &doc,  UIManager &ui);
+    static void handleProgress(const JsonDocument &doc,  UIManager &ui);
+    static void handleMediaArt(const JsonDocument &doc,  UIManager &ui);
+    static void handleSystem(const JsonDocument &doc, UIManager& ui);
+    static void handleClock(const JsonDocument &doc, UIManager& ui);
 };

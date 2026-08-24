@@ -7,7 +7,7 @@
 
 // ############### OUTGOING #####################
 
-void NetworkInterface::sendJson(const StaticJsonDocument<128> &doc)
+void NetworkInterface::sendJson(const JsonDocument &doc)
 {
     String output;
     serializeJson(doc, output);
@@ -17,98 +17,98 @@ void NetworkInterface::sendJson(const StaticJsonDocument<128> &doc)
 
 void NetworkInterface::sendVolumeUp()
 {
-    StaticJsonDocument<128> doc;
+    JsonDocument doc;
     doc["btn"] = "volume_up";
     sendJson(doc);
 };
 
 void NetworkInterface::sendVolumeDown()
 {
-    StaticJsonDocument<128> doc;
+    JsonDocument doc;
     doc["btn"] = "volume_down";
     sendJson(doc);
 };
 
 void NetworkInterface::sendToggleMute()
 {
-    StaticJsonDocument<128> doc;
+    JsonDocument doc;
     doc["btn"] = "toggle_mute";
     sendJson(doc);
 }
 
 void NetworkInterface::sendPage()
 {
-    StaticJsonDocument<128> doc;
+    JsonDocument doc;
     doc["btn"] = "page";
     sendJson(doc);
 };
 
 void NetworkInterface::sendToggleMic()
 {
-    StaticJsonDocument<128> doc;
+    JsonDocument doc;
     doc["btn"] = "toggle_mic";
     sendJson(doc);
 }
 
 void NetworkInterface::sendScreenshot()
 {
-    StaticJsonDocument<128> doc;
+    JsonDocument doc;
     doc["btn"] = "screenshot";
     sendJson(doc);
 }
 
 void NetworkInterface::sendLock()
 {
-    StaticJsonDocument<128> doc;
+    JsonDocument doc;
     doc["btn"] = "lock";
     sendJson(doc);
 }
 
 void NetworkInterface::sendF1()
 {
-    StaticJsonDocument<128> doc;
+    JsonDocument doc;
     doc["btn"] = "f1";
     sendJson(doc);
 }
 
 void NetworkInterface::sendF2()
 {
-    StaticJsonDocument<128> doc;
+    JsonDocument doc;
     doc["btn"] = "f2";
     sendJson(doc);
 }
 
 void NetworkInterface::sendF3()
 {
-    StaticJsonDocument<128> doc;
+    JsonDocument doc;
     doc["btn"] = "f3";
     sendJson(doc);
 }
 
 void NetworkInterface::sendF4()
 {
-    StaticJsonDocument<128> doc;
+    JsonDocument doc;
     doc["btn"] = "f4";
     sendJson(doc);
 }
 
 void NetworkInterface::sendPrev()
 {
-    StaticJsonDocument<128> doc;
+    JsonDocument doc;
     doc["btn"] = "prev";
     sendJson(doc);
 }
 
 void NetworkInterface::sendTogglePause()
 {
-    StaticJsonDocument<128> doc;
+    JsonDocument doc;
     doc["btn"] = "toggle_pause";
     sendJson(doc);
 }
 
 void NetworkInterface::sendNext()
 {
-    StaticJsonDocument<128> doc;
+    JsonDocument doc;
     doc["btn"] = "next";
     sendJson(doc);
 }
@@ -117,7 +117,7 @@ void NetworkInterface::sendNext()
 
 void NetworkInterface::handleIncomingData(UIManager &ui, String &jsonPayload)
 {
-    StaticJsonDocument<512> doc;
+    JsonDocument doc;
     DeserializationError error = deserializeJson(doc, jsonPayload);
 
     if (error)
@@ -163,12 +163,12 @@ void NetworkInterface::handleIncomingData(UIManager &ui, String &jsonPayload)
     };
 }
 
-void NetworkInterface::handleClock(const StaticJsonDocument<512> &doc, UIManager &ui){
+void NetworkInterface::handleClock(const JsonDocument &doc, UIManager &ui){
 
 }
 
 
-void NetworkInterface::handleTrack(const StaticJsonDocument<512> &doc, UIManager &ui)
+void NetworkInterface::handleTrack(const JsonDocument &doc, UIManager &ui)
 {
 
     ui.switchTo(MEDIA_PAGE);
@@ -184,14 +184,14 @@ void NetworkInterface::handleTrack(const StaticJsonDocument<512> &doc, UIManager
     ui.mediaPage().updateProgress(pos, currentDurationSec);
 }
 
-void NetworkInterface::handleProgress(const StaticJsonDocument<512> &doc, UIManager &ui)
+void NetworkInterface::handleProgress(const JsonDocument &doc, UIManager &ui)
 {
     float pos = doc["pos"].as<float>();
     float duration = doc["dur"].as<float>();
     ui.mediaPage().updateProgress((int)pos, (int)duration);
 }
 
-void NetworkInterface::handleMediaArt(const StaticJsonDocument<512> &doc, UIManager &ui)
+void NetworkInterface::handleMediaArt(const JsonDocument &doc, UIManager &ui)
 {
     Serial.println("handle media art");
 
@@ -201,7 +201,7 @@ void NetworkInterface::handleMediaArt(const StaticJsonDocument<512> &doc, UIMana
         receiveAndDrawArt(ui);
     }
 }
-void NetworkInterface::handleSystem(const StaticJsonDocument<512> &doc, UIManager &ui)
+void NetworkInterface::handleSystem(const JsonDocument &doc, UIManager &ui)
 {
 
 
