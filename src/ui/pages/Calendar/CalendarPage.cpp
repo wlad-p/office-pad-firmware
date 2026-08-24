@@ -1,4 +1,4 @@
-#include "pages/Calendar/CalendarPage.h"
+#include "ui/pages/Calendar/CalendarPage.h"
 #include "Config.h"
 #include <ui/BottomBar.h>
 #include <ui/TopBar.h>

@@ -1,6 +1,5 @@
 #include "Config.h"
 
-
 struct UI
 {
     static const int TILE_WIDTH = 225;
@@ -20,6 +19,5 @@ struct UI
 
     static const int DISK_X = 245 ;
     static const int DISK_Y = Layout::topBarHeight + 8 + 20 + UI::TILE_HEIGHT + 8;
-
     
 };

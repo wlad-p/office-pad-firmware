@@ -1,4 +1,4 @@
-#include "pages/Startup/StartupPage.h"
+#include "ui/pages/Startup/StartupPage.h"
 
 void StartupPage::drawStaticLayout(){
     _tft.fillScreen(COLOR_BG);

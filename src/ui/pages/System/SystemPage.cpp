@@ -1,5 +1,5 @@
 #include "SystemPage.h"
-#include "pages/System/LayoutConfig.h"
+#include "ui/pages/System/LayoutConfig.h"
 #include "ui/BottomBar.h"
 #include "ui/TopBar.h"
 #include <ui/icons/CPUIcon.h>

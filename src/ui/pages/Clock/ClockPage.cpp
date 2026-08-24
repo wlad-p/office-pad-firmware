@@ -1,4 +1,4 @@
-#include "pages/Clock/ClockPage.h"
+#include "ui/pages/Clock/ClockPage.h"
 #include "Config.h"
 #include "ui/TopBar.h"
 #include "ui/BottomBar.h"

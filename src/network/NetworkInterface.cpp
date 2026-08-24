@@ -1,9 +1,9 @@
 #include "network/NetworkInterface.h"
 #include "Config.h"
 #include "ui/UIManager.h"
-#include "pages/PageID.h"
+#include "ui/pages/PageID.h"
 #include "NetworkCommands.h"
-#include <pages/Media/LayoutConfig.h>
+#include "ui/pages/Media/LayoutConfig.h"
 
 // ############### OUTGOING #####################
 

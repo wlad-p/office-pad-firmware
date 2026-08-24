@@ -2,7 +2,7 @@
 
 #include <TFT_eSPI.h>
 #include "Config.h"
-#include "pages/IPage.h"
+#include "ui/pages/IPage.h"
 
 class CalendarPage : public IPage {
 public:

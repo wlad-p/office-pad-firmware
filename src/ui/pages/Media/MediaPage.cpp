@@ -1,6 +1,6 @@
 // MediaPage.cpp
 #include "MediaPage.h"
-#include "pages/Media/LayoutConfig.h"
+#include "ui/pages/Media/LayoutConfig.h"
 #include "ui/TopBar.h"
 #include "ui/BottomBar.h"
 

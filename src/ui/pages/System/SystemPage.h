@@ -2,8 +2,8 @@
 
 #include <TFT_eSPI.h>
 #include "Config.h"
-#include "pages/IPage.h"
-#include "pages/System/SystemStats.h"
+#include "ui/pages/IPage.h"
+#include "ui/pages/System/SystemStats.h"
 
 class SystemPage : public IPage {
 public:
