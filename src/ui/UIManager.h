@@ -5,37 +5,41 @@
 #include "pages/IPage.h"
 #include "pages/Media/MediaPage.h"
 #include "pages/System/SystemPage.h"
+#include "pages/Startup/StartupPage.h"
 #include <TFT_eSPI.h>
 #include "pages/PageID.h"
-
-
 
 class UIManager
 {
 public:
   UIManager(TFT_eSPI &tft)
-      : _tft(tft), _current(nullptr), clockPage_(0, tft), mediaPage_(1, tft),
-        calendarPage_(2, tft), systemPage_(3, tft) {}
+      : _tft(tft), _current(nullptr), _clockPage(0, tft), _mediaPage(1, tft),
+        _calendarPage(2, tft), _systemPage(3, tft), _startupPage(5, tft) {};
 
-  MediaPage &mediaPage() { return mediaPage_; }
-  SystemPage &systemPage() { return systemPage_; }
-  ClockPage &clockPage() { return clockPage_; }
-  CalendarPage &calendarPage() { return calendarPage_; }
+  UIManager() = default;
+
+  StartupPage &startupPage() { return _startupPage; }
+  MediaPage &mediaPage() { return _mediaPage; }
+  SystemPage &systemPage() { return _systemPage; }
+  ClockPage &clockPage() { return _clockPage; }
+  CalendarPage &calendarPage() { return _calendarPage; }
 
   void init();
   void resetDisplay();
   void switchTo(PageID id);
 
   PageID currentPageID();
+  TFT_eSPI &tft() { return _tft; };
 
 private:
   TFT_eSPI &_tft;
   IPage *_current;
 
-  ClockPage clockPage_;
-  MediaPage mediaPage_;
-  CalendarPage calendarPage_;
-  SystemPage systemPage_;
+  StartupPage _startupPage;
+  ClockPage _clockPage;
+  MediaPage _mediaPage;
+  CalendarPage _calendarPage;
+  SystemPage _systemPage;
 
   IPage *pageForID(PageID id);
 };

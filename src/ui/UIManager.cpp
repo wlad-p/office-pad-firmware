@@ -16,7 +16,7 @@ void UIManager::resetDisplay()
 
 void UIManager::switchTo(PageID id)
 {
-    _tft.fillScreen(TFT_BLACK); // clear between pages
+    // _tft.fillScreen(TFT_BLACK); // clear between pages
     _current = pageForID(id);
     if (_current)
         _current->drawStatic(_tft);
@@ -26,14 +26,16 @@ IPage *UIManager::pageForID(PageID id)
 {
     switch (id)
     {
+    case STARTUP_PAGE:
+        return &_startupPage;
     case MEDIA_PAGE:
-        return &mediaPage_;
+        return &_mediaPage;
     case SYSTEM_PAGE:
-        return &systemPage_;
+        return &_systemPage;
     case CLOCK_PAGE:
-        return &clockPage_;
+        return &_clockPage;
     case CALENDAR_PAGE:
-        return &calendarPage_;
+        return &_calendarPage;
     default:
         return nullptr;
     }

@@ -1,13 +1,17 @@
 #include "pages/Calendar/CalendarPage.h"
 #include "Config.h"
+#include <ui/BottomBar.h>
+#include <ui/TopBar.h>
 
 void CalendarPage::drawStaticLayout() {
-    _tft.fillScreen(TFT_RED);
+    _tft.fillScreen(COLOR_BG);
+    BottomBar bottomBar(_tft, 2);
+    bottomBar.draw();
 
-    _tft.fillRect(0, 0, Layout::screenWidth, Layout::topBarHeight, TFT_BLACK);
-    _tft.drawFastHLine(0, Layout::topBarHeight, Layout::screenWidth, TFT_BLACK);
-    
-    _tft.setTextColor(TFT_BLACK);
-    _tft.drawString("NOW PLAYING", 15, 10, 2);
+    TopBar topBar(_tft);
+    topBar.draw();
 
+    _tft.setTextColor(COLOR_TEXT);
+    _tft.setTextDatum(TL_DATUM);
+    _tft.drawString("Upcoming Events", 15, Layout::topBarHeight + 8);
 }

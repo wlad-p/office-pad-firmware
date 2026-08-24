@@ -33,6 +33,7 @@ private:
 
     static void handleTrack(const StaticJsonDocument<512> &doc,  UIManager &ui);
     static void handleProgress(const StaticJsonDocument<512> &doc,  UIManager &ui);
-    static void handleArtSize(const StaticJsonDocument<512> &doc,  UIManager &ui);
+    static void handleMediaArt(const StaticJsonDocument<512> &doc,  UIManager &ui);
     static void handleSystem(const StaticJsonDocument<512> &doc, UIManager& ui);
+    static void handleClock(const StaticJsonDocument<512> &doc, UIManager& ui);
 };

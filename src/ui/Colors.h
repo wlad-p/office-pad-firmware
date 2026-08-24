@@ -2,7 +2,7 @@
 
 #define COLOR_BG 0x10a4
 #define COLOR_BG_DARK 0x0841
-#define COLOR_BG_LIGHT 0x18e5
+#define COLOR_BG_LIGHT 0x322a
 
 
 #define COLOR_TEXT 0xFFFF

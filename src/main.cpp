@@ -19,7 +19,7 @@ void setup() {
   pinMode(TFT_BL, OUTPUT);
 
   ui.init();
-  ui.switchTo(SYSTEM_PAGE);
+  ui.switchTo(STARTUP_PAGE);
 
   digitalWrite(TFT_BL, HIGH);
 

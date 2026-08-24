@@ -2,7 +2,7 @@
 #include <cstdint> 
 
 struct SystemStats{
-    int     cpuPercent      = 0;
+    float     cpuPercent      = 0.0f;
     int64_t ramTotalBytes   = 0;
     int64_t ramUsedBytes    = 0;
     int64_t swapTotalBytes  = 0;

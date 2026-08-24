@@ -23,9 +23,8 @@ void MediaPage::drawStaticLayout()
     _tft.fillCircle(UI::artX + (UI::artSize / 2), UI::artY + (UI::artSize / 2), 55, COLOR_BG);
     _tft.fillCircle(UI::artX + (UI::artSize / 2), UI::artY + (UI::artSize / 2), 18, COLOR_PRIMARY);
 
-    updateTrack("Ausgehen", "AnnenMayKanthereit","Schlagschatten");
-    updateProgress(20,100);
-
+    updateTrack("Ausgehen", "AnnenMayKanthereit", "Schlagschatten");
+    updateProgress(20, 100);
 }
 
 void MediaPage::updateTrack(const char *title, const char *artist, const char *album)
@@ -54,12 +53,14 @@ void MediaPage::clearMetadataArea()
     _tft.fillRect(UI::contentX, UI::titleY, width, 100, COLOR_BG);
 }
 
+void MediaPage::updateProgress(int currentSec, int totalSec)
+{
+    if (totalSec <= 0)
+        totalSec = 1; // Prevent division by zero
 
-void MediaPage::updateProgress(int currentSec, int totalSec) {
-    if (totalSec <= 0) totalSec = 1; // Prevent division by zero
-    
     float pct = (float)currentSec / (float)totalSec;
-    if (pct > 1.0) pct = 1.0;
+    if (pct > 1.0)
+        pct = 1.0;
     int currentWidth = UI::barWidth * pct;
 
     // Redraw Progress Bar
@@ -74,7 +75,14 @@ void MediaPage::updateProgress(int currentSec, int totalSec) {
 
     _tft.setTextColor(COLOR_TEXT_GRAY, COLOR_BG);
     _tft.drawString(elapsed, UI::barX, UI::barY + 12, 2);
-    
+
     int rightTextWidth = _tft.textWidth(remaining, 2);
     _tft.drawString(remaining, (UI::barX + UI::barWidth) - rightTextWidth, UI::barY + 12, 2);
+}
+
+void MediaPage::drawAlbumArt(int x, int y, int w, int h)
+{
+    _tft.fillRect(x, y, w, h, COLOR_BG);
+    _tft.drawRect(x, y, w, h, TFT_DARKGREY);                 // outer border
+    _tft.drawRect(x + 1, y + 1, w - 2, h - 2, TFT_DARKGREY); // inner border
 }

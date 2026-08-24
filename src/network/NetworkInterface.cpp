@@ -3,6 +3,7 @@
 #include "ui/UIManager.h"
 #include "pages/PageID.h"
 #include "NetworkCommands.h"
+#include <pages/Media/LayoutConfig.h>
 
 // ############### OUTGOING #####################
 
@@ -144,11 +145,13 @@ void NetworkInterface::handleIncomingData(UIManager &ui, String &jsonPayload)
     case TRACK:
         handleTrack(doc, ui);
         break;
+    case CLOCK:
+        handleClock(doc, ui);
     case PROGRESS:
         handleProgress(doc, ui);
         break;
-    case ART_SIZE:
-        handleArtSize(doc, ui);
+    case MEDIA_ART:
+        handleMediaArt(doc, ui);
         break;
     case SYSTEM:
         handleSystem(doc, ui);
@@ -158,6 +161,10 @@ void NetworkInterface::handleIncomingData(UIManager &ui, String &jsonPayload)
     default:
         break;
     };
+}
+
+void NetworkInterface::handleClock(const StaticJsonDocument<512> &doc, UIManager &ui){
+
 }
 
 
@@ -180,31 +187,26 @@ void NetworkInterface::handleTrack(const StaticJsonDocument<512> &doc, UIManager
 void NetworkInterface::handleProgress(const StaticJsonDocument<512> &doc, UIManager &ui)
 {
     float pos = doc["pos"].as<float>();
-
-    if (doc.containsKey("dur"))
-    {
-        float duration = doc["dur"].as<float>();
-        int currentDurationSec = (int)duration;
-    }
-
-    // TODO
-    ui.mediaPage().updateProgress((int)pos, 0);
+    float duration = doc["dur"].as<float>();
+    ui.mediaPage().updateProgress((int)pos, (int)duration);
 }
 
-void NetworkInterface::handleArtSize(const StaticJsonDocument<512> &doc, UIManager &ui)
+void NetworkInterface::handleMediaArt(const StaticJsonDocument<512> &doc, UIManager &ui)
 {
+    Serial.println("handle media art");
+
     long expectedSize = doc["size"] | 0;
     if (expectedSize == 39200)
     {
-        // receiveAndDrawArt(ui);
+        receiveAndDrawArt(ui);
     }
 }
 void NetworkInterface::handleSystem(const StaticJsonDocument<512> &doc, UIManager &ui)
 {
     SystemStats _stats;
-    _stats.cpuPercent = doc["cpu_percent"] | 0;
-    _stats.ramTotalBytes = atoll(doc["ram_total_bytes"] | "0");
-    _stats.ramUsedBytes = atoll(doc["ram_used_bytes"] | "0");
+    _stats.cpuPercent = doc["cpu_percent"] | 0.0f;
+    _stats.ramTotalBytes = std::stof(doc["ram_total_bytes"] | "0");
+    _stats.ramUsedBytes = std::stof(doc["ram_used_bytes"] | "0");
     _stats.swapTotalBytes = atoll(doc["swap_total_bytes"] | "0");
     _stats.swapUsedBytes = atoll(doc["swap_used_bytes"] | "0");
     _stats.diskTotalBytes = atoll(doc["disk_total_bytes"] | "0");
@@ -214,28 +216,53 @@ void NetworkInterface::handleSystem(const StaticJsonDocument<512> &doc, UIManage
     ui.systemPage().updateStats(_stats);
 }
 
-//
-// void receiveAndDrawArt(UIManager& ui) {
-//  int x = Layout::artX;
-//  int y = Layout::M_artY;
-//  int w = Layout::M_artSize;
-//  int h = Layout::M_artSize;
-//
-//  ui.mediaPlayer().drawAlbumArt(x, y, w, h);
-//
-//  long bytesRead = 0;
-//  uint8_t buffer[2]; // Temp buffer to hold 1 pixel (2 bytes)
-//
-//  while (bytesRead < 39200) {
-//    if (Serial.available() >= 2) {
-//      Serial.readBytes(buffer, 2);
-//
-//      // Reconstruct pixel color
-//      uint16_t color = (buffer[0] << 8) | buffer[1];
-//
-//      // Write pixel immediately to the display controller's RAM
-//      ui.mediaPlayer().pushColor(color);
-//      bytesRead += 2;
-//    }
-//  }
-//}
+
+void NetworkInterface::receiveAndDrawArt(UIManager& ui) {
+
+    Serial.println("receive and draw art");
+    const int x = UI::artX;
+    const int y = UI::artY;
+    const int w = UI::artSize;
+    const int h = UI::artSize;
+    const long totalBytes = (long)w * h * 2;
+
+    // Draw placeholder / background while we receive
+    // ui.mediaPage().drawAlbumArt(x, y, w, h);
+
+    // --- Create sprite ---
+    TFT_eSprite sprite(&ui.tft()); // ui.tft() must return TFT_eSPI&
+    sprite.setColorDepth(16);
+
+    if (!sprite.createSprite(w, h)) {
+        // Fallback: not enough RAM, draw pixel by pixel
+        // long bytesRead = 0;
+        // uint8_t buf[2];
+        // ui.mediaPage().setAddrWindow(x, y, x + w - 1, y + h - 1);
+        // while (bytesRead < totalBytes) {
+        //     if (Serial.available() >= 2) {
+        //         Serial.readBytes(buf, 2);
+        //         uint16_t color = (buf[0] << 8) | buf[1];
+        //         ui.mediaPage().pushColor(color);
+        //         bytesRead += 2;
+        //     }
+        // }
+        return;
+    }
+
+    // --- Receive directly into sprite's raw buffer ---
+    uint16_t* spriteBuffer = (uint16_t*)sprite.getPointer();
+    long pixelsReceived = 0;
+    const long totalPixels = (long)w * h;
+    uint8_t buf[2];
+
+    while (pixelsReceived < totalPixels) {
+        if (Serial.available() >= 2) {
+            Serial.readBytes(buf, 2);
+            spriteBuffer[pixelsReceived++] = (buf[0] << 8) | buf[1];
+        }
+    }
+
+    // --- Push entire frame to display in one shot ---
+    sprite.pushSprite(x, y);
+    sprite.deleteSprite();
+}

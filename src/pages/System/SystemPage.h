@@ -24,5 +24,10 @@ private:
     void drawStaticTile(TileParams params);
 
     void drawStaticLayout();
+
+    void updateCpu(int percent);
+    void updateRam(int current, int total);
+    void updateSwap(int current, int total);
+    void updateStorage(int current, int total);
   
 };

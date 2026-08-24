@@ -3,6 +3,7 @@
 
 enum PageID
 {
+  STARTUP_PAGE,
   CLOCK_PAGE,
   MEDIA_PAGE,
   CALENDAR_PAGE,
