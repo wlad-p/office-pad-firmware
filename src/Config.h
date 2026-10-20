@@ -3,6 +3,10 @@
 #define CONFIG_H
 
 #include "ui/Colors.h"
+#include "fonts/FontTime.h"
+#include "fonts/FontTemp.h"
+#include "fonts/FontDate.h"
+#include "fonts/FontSmall.h"
 
 // ------ INPUTS -------
 

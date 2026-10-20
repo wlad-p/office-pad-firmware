@@ -10,3 +10,5 @@
 #define TFT_RST   8  // Reset pin (could connect to NodeMCU RST, see next line)
 #define TFT_BL    18
 #define SPI_FREQUENCY  40000000
+
+#define SMOOTH_FONT

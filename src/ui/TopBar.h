@@ -4,11 +4,12 @@
 
 class TopBar{
     public:
-    TopBar(TFT_eSPI& tft) : _tft(tft) {};
-    void draw();
+    TopBar(TFT_eSPI& tft) : tft_(tft) {};
+    void draw(Page active, bool linkOk, const char *time);
+
 
     private:
-    TFT_eSPI _tft;
+    TFT_eSPI tft_;
 
 };
 

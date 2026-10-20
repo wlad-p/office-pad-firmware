@@ -1,10 +1,10 @@
 #include "ui/pages/Startup/StartupPage.h"
 
 void StartupPage::drawStaticLayout(){
-    _tft.fillScreen(COLOR_BG);
+    tft_.fillScreen(Theme::Background);
 
-    _tft.setTextColor(COLOR_TEXT);
-    _tft.setTextDatum(TL_DATUM);
-    _tft.drawString("No Connection Found. Install and configure the OfficePad Application on your PC.", 15, 200);
+    tft_.setTextColor(Theme::Text);
+    tft_.setTextDatum(TL_DATUM);
+    tft_.drawString("No Connection Found. Install and configure the OfficePad Application on your PC.", 15, 200);
 
 }

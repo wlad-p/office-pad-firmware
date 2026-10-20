@@ -1,5 +1,5 @@
 #pragma once
-#include "ui/UIManager.h"
+#include "ui/App.h"
 #include "NetworkCommands.h"
 #include <ArduinoJson.h>
 
@@ -7,11 +7,11 @@ class NetworkInterface
 {
 
 public:
-    static void handleIncomingData(UIManager &ui, String &jsonPayload);
+    static void handleIncomingData(String &jsonPayload);
     static void sendVolumeUp();
     static void sendVolumeDown();
     static void sendToggleMute();
-    static void receiveAndDrawArt(UIManager &ui);
+    static void receiveAndDrawArt();
 
     static void sendPage();
     static void sendToggleMic();
@@ -31,9 +31,11 @@ private:
 
     static void sendJson(const JsonDocument &doc);
 
-    static void handleTrack(const JsonDocument &doc,  UIManager &ui);
-    static void handleProgress(const JsonDocument &doc,  UIManager &ui);
-    static void handleMediaArt(const JsonDocument &doc,  UIManager &ui);
-    static void handleSystem(const JsonDocument &doc, UIManager& ui);
-    static void handleClock(const JsonDocument &doc, UIManager& ui);
+    static void handleTrack(const JsonDocument &doc);
+    static void handleProgress(const JsonDocument &doc);
+    static void handleMediaArt(const JsonDocument &doc);
+    static void handleSystem(const JsonDocument &doc);
+    static void handleClock(const JsonDocument &doc);
+    static void handleCalendar(const JsonDocument &doc);
+
 };

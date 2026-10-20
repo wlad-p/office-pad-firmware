@@ -1,9 +1,10 @@
 #include "network/NetworkInterface.h"
 #include "Config.h"
-#include "ui/UIManager.h"
+#include "ui/App.h"
 #include "ui/pages/PageID.h"
 #include "NetworkCommands.h"
 #include "ui/pages/Media/LayoutConfig.h"
+#include "ui/pages/Calendar/CalendarEvent.h"
 
 // ############### OUTGOING #####################
 
@@ -115,7 +116,7 @@ void NetworkInterface::sendNext()
 
 // ############### INCOMING #####################
 
-void NetworkInterface::handleIncomingData(UIManager &ui, String &jsonPayload)
+void NetworkInterface::handleIncomingData(String &jsonPayload)
 {
     JsonDocument doc;
     DeserializationError error = deserializeJson(doc, jsonPayload);
@@ -126,11 +127,12 @@ void NetworkInterface::handleIncomingData(UIManager &ui, String &jsonPayload)
     }
 
     // Set page
-    const char* pageString = doc["page"];
+    const char *pageString = doc["page"];
     PageID page = pageIdFromString(pageString);
-    PageID currentPageID = ui.currentPageID();
-    if(currentPageID != page){
-        ui.switchTo(page);
+    PageID currentPageID = App::instance().currentPageID();
+    if (currentPageID != page)
+    {
+        App::instance().switchTo(page);
         return;
     }
 
@@ -143,18 +145,21 @@ void NetworkInterface::handleIncomingData(UIManager &ui, String &jsonPayload)
     switch (cmd)
     {
     case TRACK:
-        handleTrack(doc, ui);
+        handleTrack(doc);
         break;
     case CLOCK:
-        handleClock(doc, ui);
+        handleClock(doc);
     case PROGRESS:
-        handleProgress(doc, ui);
+        handleProgress(doc);
         break;
     case MEDIA_ART:
-        handleMediaArt(doc, ui);
+        handleMediaArt(doc);
+        break;
+    case CALENDAR:
+        handleCalendar(doc);
         break;
     case SYSTEM:
-        handleSystem(doc, ui);
+        handleSystem(doc);
         break;
     case UNKNOWN:
         break;
@@ -163,15 +168,49 @@ void NetworkInterface::handleIncomingData(UIManager &ui, String &jsonPayload)
     };
 }
 
-void NetworkInterface::handleClock(const JsonDocument &doc, UIManager &ui){
+void NetworkInterface::handleCalendar(const JsonDocument &doc)
+{
+    const size_t MAX_EVENTS = 3;
 
+    JsonArrayConst eventList = doc["events"].as<JsonArrayConst>();
+    CalendarEvent calendarEvents[MAX_EVENTS];
+
+    size_t NUM_EVENTS = eventList.size();
+    for (int i=0; i < NUM_EVENTS; i++)
+    {
+        const char *title = eventList[i]["title"];
+        const char *location = eventList[i]["location"];
+        uint16_t year = eventList[i]["year"].as<uint16_t>();
+        uint8_t month = eventList[i]["month"].as<uint8_t>();
+        uint8_t day = eventList[i]["day"].as<uint8_t>();
+        uint8_t hour = eventList[i]["hour"].as<uint8_t>();
+        uint8_t min = eventList[i]["min"].as<uint8_t>();
+        bool allDay = eventList[i]["all_day"].as<bool>();
+
+        CalendarEvent event{.title = title, .location = location, .year = year, .month = month, .day = day, .hour = hour, .min = min, .allDay = allDay};
+        calendarEvents[i] = event;
+    }
+
+    App::instance().calendarPage().updateEvents(calendarEvents, NUM_EVENTS);
 }
 
-
-void NetworkInterface::handleTrack(const JsonDocument &doc, UIManager &ui)
+void NetworkInterface::handleClock(const JsonDocument &doc)
 {
 
-    ui.switchTo(MEDIA_PAGE);
+    uint16_t year = doc["year"].as<uint16_t>();
+    uint8_t month = doc["month"].as<uint8_t>();
+    uint8_t day = doc["day"].as<uint8_t>();
+    uint8_t dotw = doc["dotw"].as<uint8_t>();
+    uint8_t hour = doc["hour"].as<uint8_t>();
+    uint8_t min = doc["min"].as<uint8_t>();
+    uint8_t sec = doc["sec"].as<uint8_t>();
+
+    App::instance().sync(year, month, day, dotw, hour, min, sec);
+}
+
+void NetworkInterface::handleTrack(const JsonDocument &doc)
+{
+
     const char *title = doc["title"] | "Unknown Title";
     const char *artist = doc["artist"] | "Unknown Artist";
     const char *album = doc["album"] | "";
@@ -180,31 +219,29 @@ void NetworkInterface::handleTrack(const JsonDocument &doc, UIManager &ui)
 
     int currentDurationSec = (int)duration;
 
-    ui.mediaPage().updateTrack(title, artist, album);
-    ui.mediaPage().updateProgress(pos, currentDurationSec);
+    App::instance().mediaPage().updateTrack(title, artist, album);
+    App::instance().mediaPage().updateProgress(pos, currentDurationSec);
 }
 
-void NetworkInterface::handleProgress(const JsonDocument &doc, UIManager &ui)
+void NetworkInterface::handleProgress(const JsonDocument &doc)
 {
     float pos = doc["pos"].as<float>();
     float duration = doc["dur"].as<float>();
-    ui.mediaPage().updateProgress((int)pos, (int)duration);
+    App::instance().mediaPage().updateProgress((int)pos, (int)duration);
 }
 
-void NetworkInterface::handleMediaArt(const JsonDocument &doc, UIManager &ui)
+void NetworkInterface::handleMediaArt(const JsonDocument &doc)
 {
     Serial.println("handle media art");
 
     long expectedSize = doc["size"] | 0;
     if (expectedSize == 39200)
     {
-        receiveAndDrawArt(ui);
+        receiveAndDrawArt();
     }
 }
-void NetworkInterface::handleSystem(const JsonDocument &doc, UIManager &ui)
+void NetworkInterface::handleSystem(const JsonDocument &doc)
 {
-
-
     SystemStats _stats;
     _stats.cpuPercent = doc["cpu_percent"].as<float>();
     _stats.ramTotalGB = doc["ram_total_gb"].as<float>();
@@ -215,11 +252,11 @@ void NetworkInterface::handleSystem(const JsonDocument &doc, UIManager &ui)
     _stats.diskUsedGB = doc["disk_used_gb"].as<float>();
     _stats.valid = true;
 
-    ui.systemPage().updateStats(_stats);
+    App::instance().systemPage().updateStats(_stats);
 }
 
-
-void NetworkInterface::receiveAndDrawArt(UIManager& ui) {
+void NetworkInterface::receiveAndDrawArt()
+{
 
     Serial.println("receive and draw art");
     const int x = UI::artX;
@@ -229,22 +266,23 @@ void NetworkInterface::receiveAndDrawArt(UIManager& ui) {
     const long totalBytes = (long)w * h * 2;
 
     // Draw placeholder / background while we receive
-    // ui.mediaPage().drawAlbumArt(x, y, w, h);
+    // App::instance().mediaPage().drawAlbumArt(x, y, w, h);
 
     // --- Create sprite ---
-    TFT_eSprite sprite(&ui.tft()); // ui.tft() must return TFT_eSPI&
+    TFT_eSprite sprite(&App::instance().tft()); // App::instance().tft() must return TFT_eSPI&
     sprite.setColorDepth(16);
 
-    if (!sprite.createSprite(w, h)) {
+    if (!sprite.createSprite(w, h))
+    {
         // Fallback: not enough RAM, draw pixel by pixel
         // long bytesRead = 0;
-        // uint8_t buf[2];
-        // ui.mediaPage().setAddrWindow(x, y, x + w - 1, y + h - 1);
+        // App::instance()nt8_t buf[2];
+        // App::instance().mediaPage().setAddrWindow(x, y, x + w - 1, y + h - 1);
         // while (bytesRead < totalBytes) {
         //     if (Serial.available() >= 2) {
         //         Serial.readBytes(buf, 2);
-        //         uint16_t color = (buf[0] << 8) | buf[1];
-        //         ui.mediaPage().pushColor(color);
+        //         App::instance()nt16_t color = (buf[0] << 8) | buf[1];
+        //         App::instance().mediaPage().pushColor(color);
         //         bytesRead += 2;
         //     }
         // }
@@ -252,13 +290,15 @@ void NetworkInterface::receiveAndDrawArt(UIManager& ui) {
     }
 
     // --- Receive directly into sprite's raw buffer ---
-    uint16_t* spriteBuffer = (uint16_t*)sprite.getPointer();
+    uint16_t *spriteBuffer = (uint16_t *)sprite.getPointer();
     long pixelsReceived = 0;
     const long totalPixels = (long)w * h;
     uint8_t buf[2];
 
-    while (pixelsReceived < totalPixels) {
-        if (Serial.available() >= 2) {
+    while (pixelsReceived < totalPixels)
+    {
+        if (Serial.available() >= 2)
+        {
             Serial.readBytes(buf, 2);
             spriteBuffer[pixelsReceived++] = (buf[0] << 8) | buf[1];
         }

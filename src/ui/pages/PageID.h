@@ -41,8 +41,11 @@ inline PageID pageIdFromInt(int id)
   case 3:
     return SYSTEM_PAGE;
     break;
+  case 4:
+    return STARTUP_PAGE;
+    break;
   default: break;
   }
 
-  return CLOCK_PAGE;
+  return STARTUP_PAGE;
 };

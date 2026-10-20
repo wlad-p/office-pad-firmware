@@ -10,7 +10,7 @@ class MediaPage : public IPage
 {
 public:
     MediaPage(uint8_t id, TFT_eSPI &tft) : IPage(id, tft) {}
-    void drawStatic(TFT_eSPI &tft) override { drawStaticLayout(); };
+    void drawStatic() override { drawStaticLayout(); };
     void updateTrack(const char *title, const char *artist, const char *album);
     void updateProgress(int currentSec, int totalSec);
     void drawAlbumArt(int x, int y, int w, int h);
