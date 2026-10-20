@@ -149,6 +149,7 @@ void NetworkInterface::handleIncomingData(String &jsonPayload)
         break;
     case CLOCK:
         handleClock(doc);
+        // break;
     case PROGRESS:
         handleProgress(doc);
         break;

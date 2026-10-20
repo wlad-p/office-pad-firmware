@@ -7,7 +7,7 @@ static constexpr uint16_t rgb565(uint8_t r, uint8_t g, uint8_t b) {
 }
 
 namespace Theme {
-  constexpr uint16_t Background = rgb565(222, 196, 150t );  // warm cream
+  constexpr uint16_t Background = rgb565(222, 196, 150);  // warm cream
   constexpr uint16_t Panel      = rgb565(226, 214, 194);  // cards, pills, empty bars
   constexpr uint16_t Text       = rgb565(58, 44, 36);     // dark brown
   constexpr uint16_t SubText    = rgb565(130, 110, 92);   // secondary text

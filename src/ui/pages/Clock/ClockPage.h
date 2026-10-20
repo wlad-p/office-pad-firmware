@@ -18,7 +18,10 @@ private:
     void drawThermometer();
     void drawClockTemperature(const char *value);
 
-    void drawTime(uint8_t hour, uint8_t min, uint8_t sec);
+    void drawTime(uint8_t hour, uint8_t min);
+    void drawSeconds( uint8_t sec);
     void drawDate(uint16_t year, uint8_t month, uint8_t day, uint8_t dotweek);
     const char* dotwToString(uint8_t dotw);
+
+    int8_t lastSec_ = -1;
 };

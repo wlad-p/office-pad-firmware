@@ -8,7 +8,7 @@ void MediaPage::drawStaticLayout()
     tft_.fillScreen(Theme::Background);
 
     TopBar topBar(tft_);
-    topBar.draw(PAGE_CLOCK, true,"TODO");
+    topBar.draw(PAGE_CLOCK, true,"");
 
     tft_.setTextColor(Theme::Text);
     tft_.setTextDatum(TL_DATUM); // Middle Center
