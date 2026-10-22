@@ -27,8 +27,12 @@ void ClockPage::drawStaticLayout()
 {
     tft_.fillScreen(Theme::Background);
     TopBar topBar(tft_);
-    topBar.draw(PAGE_CLOCK, true, "TODO");
+    topBar.draw(PAGE_CLOCK, true, "");
     drawClockTemperature("22.4");
+
+    lastMin_ = -1;        // force everything to redraw on the next update
+    lastDay_ = -1;
+    lastBarWidth_ = -1;
 }
 
 void ClockPage::drawThermometer()
@@ -69,13 +73,22 @@ void ClockPage::drawClockTemperature(const char *value)
 void ClockPage::update()
 {
     static uint32_t lastTick = 0;
-    if (millis() - lastTick >= 1000)
-    {
-        lastTick = millis();
-        datetime_t dt = App::instance().dateTime();
+    if (millis() - lastTick < 1000)
+        return;
+    lastTick = millis();
+
+    datetime_t dt = App::instance().dateTime();
+
+    if (dt.min != lastMin_) {
         drawTime(dt.hour, dt.min);
-        drawSeconds(dt.sec);
+        lastMin_ = dt.min;
+        lastBarWidth_ = -1;   // the time's background box overlaps the bar, so redraw it fully
+    }
+    drawSeconds(dt.sec);
+
+    if (dt.day != lastDay_) {
         drawDate(dt.year, dt.month, dt.day, dt.dotw);
+        lastDay_ = dt.day;
     }
 }
 
@@ -92,46 +105,49 @@ void ClockPage::drawTime(uint8_t hour, uint8_t min)
     tft_.unloadFont();
 }
 
-static int16_t barEnd(uint8_t s) { return BAR_X + (int32_t)BAR_W * (s + 1) / 60; }
 void ClockPage::drawSeconds(uint8_t sec)
 {
 
-    if (sec == lastSec_)
-        return;
+    uint8_t totalSec = 60;
+    if (sec < 0)
+        sec = 0;
+    if (totalSec > 0 && sec > totalSec)
+        sec = totalSec;
 
-    if (lastSec_ < 0 || sec < lastSec_)
-    {
-        // New minute (or first draw): reset the track, then fill up to now
-        tft_.fillSmoothRoundRect(BAR_X, BAR_Y, BAR_W, BAR_H, 2, Theme::Panel, Theme::Background);
-        tft_.fillSmoothRoundRect(BAR_X, BAR_Y, barEnd(sec) - BAR_X, BAR_H, 2, Theme::Accent, Theme::Background);
-    }
-    else if (sec == 59)
-    {
-        // Last second: full bar again so the right end is rounded too
-        tft_.fillSmoothRoundRect(BAR_X, BAR_Y, BAR_W, BAR_H, 2, Theme::Accent, Theme::Background);
-    }
-    else
-    {
-        // Only paint the slice since the last update
-        int16_t x0 = barEnd(lastSec_);
-        tft_.fillRect(x0, BAR_Y, barEnd(sec) - x0, BAR_H, Theme::Accent);
-    }
-    lastSec_ = sec;
+    int16_t width = totalSec > 0 ? (int32_t)BAR_W * sec / totalSec : 0;
 
-    // Bar fills over the minute
-    int16_t fill = (int32_t)BAR_W * (sec + 1) / 60;
-    tft_.fillSmoothRoundRect(BAR_X, BAR_Y, BAR_W, BAR_H, 2, Theme::Panel, Theme::Background);
-    tft_.fillSmoothRoundRect(BAR_X, BAR_Y, fill, BAR_H, 2, Theme::Accent, Theme::Background);
+    // Bar: only paint what changed, redraw fully when it shrinks (new track, seeking back)
+    if (lastBarWidth_ < 0 || width < lastBarWidth_)
+    {
+        tft_.fillSmoothRoundRect(BAR_X, BAR_Y, BAR_W, BAR_H, BAR_H / 2, Theme::Panel, Theme::Background);
+        if (width >= BAR_H)
+            tft_.fillSmoothRoundRect(BAR_X, BAR_Y, width, BAR_H, BAR_H / 2, Theme::Accent, Theme::Background);
+        else if (width > 0)
+            tft_.fillRect(BAR_X, BAR_Y, width, BAR_H, Theme::Accent);
+    }
+    else if (width >= BAR_W - BAR_H / 2)
+    {
+        // Near the end: full rounded bar so the right end matches the track
+        tft_.fillSmoothRoundRect(BAR_X, BAR_Y, BAR_W, BAR_H, BAR_H / 2, Theme::Accent, Theme::Background);
+    }
+    else if (width > lastBarWidth_)
+    {
+        // Only paint the new slice
+        tft_.fillRect(BAR_X + lastBarWidth_, BAR_Y, width - lastBarWidth_, BAR_H, Theme::Accent);
+    }
+    lastBarWidth_ = width;
 
+    // Times
     char buf[4];
-    snprintf(buf, sizeof(buf), "%02u", sec % 60);
+    snprintf(buf, sizeof(buf), "%02u", sec);
     tft_.loadFont(FontSmall);
     tft_.setTextDatum(ML_DATUM);
-    tft_.setTextColor(Theme::Accent, Theme::Background);
+    tft_.setTextColor(Theme::Accent, Theme::Background, true);
+    tft_.setTextPadding(tft_.textWidth("88"));
     tft_.drawString(buf, SEC_X, BAR_Y + BAR_H / 2);
+    tft_.setTextPadding(0);
     tft_.unloadFont();
 }
-
 void ClockPage::drawDate(uint16_t year, uint8_t month, uint8_t day, uint8_t dotweek)
 {
     static const char *months[] = {
@@ -146,9 +162,11 @@ void ClockPage::drawDate(uint16_t year, uint8_t month, uint8_t day, uint8_t dotw
 
     tft_.loadFont(FontDate);
     tft_.setTextDatum(MC_DATUM);
-    tft_.setTextColor(Theme::SubText, Theme::Background);
+    tft_.setTextColor(Theme::SubText, Theme::Background, true);
     tft_.setTextPadding(tft_.textWidth("88:88"));
+    tft_.setTextPadding(440);
     tft_.drawString(date, CX, DATE_Y);
+    tft_.setTextPadding(0);
     tft_.unloadFont();
 }
 

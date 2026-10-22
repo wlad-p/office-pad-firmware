@@ -16,19 +16,29 @@ public:
 
   void poll()
   {
-    bool pressed = digitalRead(_pin) == LOW;
-    if (pressed && !_wasPressed)
-    {
-      if (_cb)
-        _cb();
-      _wasPressed = false;
+    bool reading = digitalRead(_pin) == LOW;
+    uint32_t now = millis();
+
+    if (reading != _lastReading)
+    { // pin changed: restart the timer
+      _lastReading = reading;
+      _lastMs = now;
     }
-    _wasPressed = pressed;
+
+    // Accept the new state once it has been stable for DEBOUNCE_MS
+    if (now - _lastMs >= DEBOUNCE_MS && reading != _wasPressed)
+    {
+      _wasPressed = reading;
+      if (_wasPressed && _cb)
+        _cb(); // fire once per press, on the settled press
+    }
   }
 
 private:
+  static constexpr uint32_t DEBOUNCE_MS = 20;
   uint8_t _pin;
   Callback _cb;
   bool _wasPressed = false;
+  bool _lastReading = false;
   uint32_t _lastMs = 0;
 };

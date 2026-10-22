@@ -14,7 +14,7 @@ void setup() {
   Serial.begin(115200);
   inputsBegin();
 
-App::instance().init();
+  App::instance().init();
   pinMode(TFT_BL, OUTPUT);
 
   App::instance().switchTo(STARTUP_PAGE);

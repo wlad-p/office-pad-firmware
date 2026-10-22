@@ -7,6 +7,10 @@
 #include "fonts/FontTemp.h"
 #include "fonts/FontDate.h"
 #include "fonts/FontSmall.h"
+#include "fonts/FontAlbum.h"
+#include "fonts/FontArtist.h"
+#include "fonts/FontTitle.h"
+
 
 // ------ INPUTS -------
 

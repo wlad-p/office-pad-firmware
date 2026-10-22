@@ -133,7 +133,7 @@ void NetworkInterface::handleIncomingData(String &jsonPayload)
     if (currentPageID != page)
     {
         App::instance().switchTo(page);
-        return;
+        // return;
     }
 
     // Run command
@@ -149,7 +149,7 @@ void NetworkInterface::handleIncomingData(String &jsonPayload)
         break;
     case CLOCK:
         handleClock(doc);
-        // break;
+        break;
     case PROGRESS:
         handleProgress(doc);
         break;

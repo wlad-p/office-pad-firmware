@@ -18,6 +18,11 @@ public:
 private:
     void drawStaticLayout();
     void clearMetadataArea();
+    void drawFitted(const char *text, int16_t x, int16_t y, int16_t maxW);
+
+
+    int16_t lastBarWidth_ = -1;
+    int16_t lastMinute_ = -1; 
 };
 
 #endif
