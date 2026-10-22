@@ -4,14 +4,18 @@
 #include "Config.h"
 #include "ui/pages/IPage.h"
 
-class StartupPage : public IPage {
+
+class StartupPage : public IPage
+{
 public:
+    StartupPage(uint8_t id, TFT_eSPI &tft) : IPage(id, tft) {}
 
-    StartupPage(uint8_t id, TFT_eSPI& tft) : IPage(id, tft) {};
-    void drawStatic() override {drawStaticLayout();};
-
+    void drawStatic() override { drawStaticLayout(); }
+    void drawStaticLayout();
 
 private:
-    void drawStaticLayout();
-  
+    void drawStatus();
+    void drawLogo();
+    void drawNotice();
+    void drawPlugIcon(int16_t cx, int16_t cy);
 };
