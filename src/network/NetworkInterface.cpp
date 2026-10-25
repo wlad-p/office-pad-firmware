@@ -169,30 +169,55 @@ void NetworkInterface::handleIncomingData(String &jsonPayload)
     };
 }
 
+static void copyText(char *dst, size_t size, const char *src)
+{
+    strncpy(dst, src ? src : "", size - 1);
+    dst[size - 1] = '\0';
+}
+
+static void readEvent(JsonObjectConst e, CalendarEvent &out)
+{
+    copyText(out.title, sizeof(out.title), e["title"] | "");
+    copyText(out.location, sizeof(out.location), e["location"] | "");
+    out.startYear = e["start_year"] | 0;
+    out.startMonth = e["start_month"] | 0;
+    out.startDay = e["start_day"] | 0;
+    out.startHour = e["start_hour"] | 0;
+    out.startMin = e["start_min"] | 0;
+    out.endYear = e["end_year"] | 0;
+    out.endMonth = e["end_month"] | 0;
+    out.endDay = e["end_day"] | 0;
+    out.endHour = e["end_hour"] | 0;
+    out.endMin = e["end_min"] | 0;
+    out.allDay = e["all_day"] | false;
+}
+
 void NetworkInterface::handleCalendar(const JsonDocument &doc)
 {
-    const size_t MAX_EVENTS = 3;
+    static CalendarEvent events[CalendarPage::MAX_EVENTS];   // static: ~1 KB, keep it off the stack
+    size_t count = 0;
 
-    JsonArrayConst eventList = doc["events"].as<JsonArrayConst>();
-    CalendarEvent calendarEvents[MAX_EVENTS];
-
-    size_t NUM_EVENTS = eventList.size();
-    for (int i=0; i < NUM_EVENTS; i++)
+    JsonVariantConst list = doc["events"];
+    if (list.is<JsonObjectConst>())
     {
-        const char *title = eventList[i]["title"];
-        const char *location = eventList[i]["location"];
-        uint16_t year = eventList[i]["year"].as<uint16_t>();
-        uint8_t month = eventList[i]["month"].as<uint8_t>();
-        uint8_t day = eventList[i]["day"].as<uint8_t>();
-        uint8_t hour = eventList[i]["hour"].as<uint8_t>();
-        uint8_t min = eventList[i]["min"].as<uint8_t>();
-        bool allDay = eventList[i]["all_day"].as<bool>();
-
-        CalendarEvent event{.title = title, .location = location, .year = year, .month = month, .day = day, .hour = hour, .min = min, .allDay = allDay};
-        calendarEvents[i] = event;
+        for (JsonPairConst kv : list.as<JsonObjectConst>())
+        {
+            if (count >= CalendarPage::MAX_EVENTS) break;
+            events[count] = CalendarEvent{};
+            readEvent(kv.value().as<JsonObjectConst>(), events[count++]);
+        }
+    }
+    else if (list.is<JsonArrayConst>())
+    {
+        for (JsonObjectConst e : list.as<JsonArrayConst>())
+        {
+            if (count >= CalendarPage::MAX_EVENTS) break;
+            events[count] = CalendarEvent{};
+            readEvent(e, events[count++]);
+        }
     }
 
-    App::instance().calendarPage().updateEvents(calendarEvents, NUM_EVENTS);
+    App::instance().calendarPage().updateEvents(events, count);
 }
 
 void NetworkInterface::handleClock(const JsonDocument &doc)

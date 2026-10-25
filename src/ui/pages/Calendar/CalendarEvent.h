@@ -1,16 +1,16 @@
 #pragma once
-#include <cstdint>
+#include <stdint.h>
 
-#define TITLE_LENGTH    64
-#define LOCATION_LENGTH 64
+// One calendar event. Strings are copied in, so the event stays valid after the JSON is gone.
+struct CalendarEvent
+{
+    char title[48] = "";
+    char location[32] = "";
 
-struct CalendarEvent {
-    const char* title;
-    const char* location;
-    uint16_t year;
-    uint8_t month;
-    uint8_t day;
-    uint8_t hour;
-    uint8_t min;
-    bool allDay;
+    uint16_t startYear = 0;
+    uint8_t startMonth = 0, startDay = 0, startHour = 0, startMin = 0;
+    uint16_t endYear = 0;
+    uint8_t endMonth = 0, endDay = 0, endHour = 0, endMin = 0;
+
+    bool allDay = false;
 };

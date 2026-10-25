@@ -14,6 +14,7 @@ namespace Theme {
   constexpr uint16_t Accent     = rgb565(206, 92, 56);    // terracotta
   constexpr uint16_t Dim        = rgb565(200, 186, 164);  // inactive dots, outlines
   constexpr uint16_t LinkOk     = rgb565(60, 200, 110);   // green link dot
+  constexpr uint16_t Warn       = rgb565(196, 48, 40);
 }
 
 enum Page : uint8_t { PAGE_CLOCK, PAGE_CALENDAR, PAGE_MEDIA, PAGE_SYSTEM, PAGE_COUNT };
