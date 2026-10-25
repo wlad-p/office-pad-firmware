@@ -13,6 +13,7 @@ enum PageID
 
 inline PageID pageIdFromString(const char *pageString)
 {
+  if (!pageString) return CLOCK_PAGE;
   if (strcmp(pageString, "clock") == 0)
     return CLOCK_PAGE;
   if (strcmp(pageString, "media") == 0)

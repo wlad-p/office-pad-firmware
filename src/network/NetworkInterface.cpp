@@ -128,12 +128,11 @@ void NetworkInterface::handleIncomingData(String &jsonPayload)
 
     // Set page
     const char *pageString = doc["page"];
-    PageID page = pageIdFromString(pageString);
-    PageID currentPageID = App::instance().currentPageID();
-    if (currentPageID != page)
+    if (pageString)
     {
-        App::instance().switchTo(page);
-        // return;
+        PageID page = pageIdFromString(pageString);
+        if (App::instance().currentPageID() != page)
+            App::instance().switchTo(page);
     }
 
     // Run command
@@ -194,7 +193,7 @@ static void readEvent(JsonObjectConst e, CalendarEvent &out)
 
 void NetworkInterface::handleCalendar(const JsonDocument &doc)
 {
-    static CalendarEvent events[CalendarPage::MAX_EVENTS];   // static: ~1 KB, keep it off the stack
+    static CalendarEvent events[CalendarPage::MAX_EVENTS]; // static: ~1 KB, keep it off the stack
     size_t count = 0;
 
     JsonVariantConst list = doc["events"];
@@ -202,7 +201,8 @@ void NetworkInterface::handleCalendar(const JsonDocument &doc)
     {
         for (JsonPairConst kv : list.as<JsonObjectConst>())
         {
-            if (count >= CalendarPage::MAX_EVENTS) break;
+            if (count >= CalendarPage::MAX_EVENTS)
+                break;
             events[count] = CalendarEvent{};
             readEvent(kv.value().as<JsonObjectConst>(), events[count++]);
         }
@@ -211,7 +211,8 @@ void NetworkInterface::handleCalendar(const JsonDocument &doc)
     {
         for (JsonObjectConst e : list.as<JsonArrayConst>())
         {
-            if (count >= CalendarPage::MAX_EVENTS) break;
+            if (count >= CalendarPage::MAX_EVENTS)
+                break;
             events[count] = CalendarEvent{};
             readEvent(e, events[count++]);
         }
@@ -236,6 +237,8 @@ void NetworkInterface::handleClock(const JsonDocument &doc)
 
 void NetworkInterface::handleTrack(const JsonDocument &doc)
 {
+
+    Serial.println("{\"dbg\":\"track\"}");
 
     const char *title = doc["title"] | "Unknown Title";
     const char *artist = doc["artist"] | "Unknown Artist";
@@ -280,57 +283,48 @@ void NetworkInterface::handleSystem(const JsonDocument &doc)
 
     App::instance().systemPage().updateStats(_stats);
 }
-
 void NetworkInterface::receiveAndDrawArt()
 {
-
-    Serial.println("receive and draw art");
     const int x = UI::artX;
     const int y = UI::artY;
     const int w = UI::artSize;
     const int h = UI::artSize;
-    const long totalBytes = (long)w * h * 2;
+    const size_t totalBytes = (size_t)w * h * 2;   // 39200
 
-    // Draw placeholder / background while we receive
-    // App::instance().mediaPage().drawAlbumArt(x, y, w, h);
-
-    // --- Create sprite ---
-    TFT_eSprite sprite(&App::instance().tft()); // App::instance().tft() must return TFT_eSPI&
+    TFT_eSprite sprite(&App::instance().tft());
     sprite.setColorDepth(16);
+    uint8_t *dst = (uint8_t *)sprite.createSprite(w, h);
 
-    if (!sprite.createSprite(w, h))
+    // Python sends RGB565 high byte first, which is the byte order the sprite
+    // stores internally, so the bytes are copied in unchanged.
+    // Without a sprite (out of RAM) the bytes are still read and dropped,
+    // so they don't end up in the JSON buffer.
+    uint8_t scratch[64];
+    size_t received = 0;
+    uint32_t lastData = millis();
+
+    while (received < totalBytes)
     {
-        // Fallback: not enough RAM, draw pixel by pixel
-        // long bytesRead = 0;
-        // App::instance()nt8_t buf[2];
-        // App::instance().mediaPage().setAddrWindow(x, y, x + w - 1, y + h - 1);
-        // while (bytesRead < totalBytes) {
-        //     if (Serial.available() >= 2) {
-        //         Serial.readBytes(buf, 2);
-        //         App::instance()nt16_t color = (buf[0] << 8) | buf[1];
-        //         App::instance().mediaPage().pushColor(color);
-        //         bytesRead += 2;
-        //     }
-        // }
-        return;
-    }
-
-    // --- Receive directly into sprite's raw buffer ---
-    uint16_t *spriteBuffer = (uint16_t *)sprite.getPointer();
-    long pixelsReceived = 0;
-    const long totalPixels = (long)w * h;
-    uint8_t buf[2];
-
-    while (pixelsReceived < totalPixels)
-    {
-        if (Serial.available() >= 2)
+        int n = Serial.available();
+        if (n > 0)
         {
-            Serial.readBytes(buf, 2);
-            spriteBuffer[pixelsReceived++] = (buf[0] << 8) | buf[1];
+            size_t want = totalBytes - received;
+            if ((size_t)n < want) want = n;
+            if (!dst && want > sizeof(scratch)) want = sizeof(scratch);
+
+            received += Serial.readBytes(dst ? dst + received : scratch, want);
+            lastData = millis();
+        }
+        else if (millis() - lastData > 1000)
+        {
+            break;   // transfer stalled: give up instead of hanging
         }
     }
 
-    // --- Push entire frame to display in one shot ---
-    sprite.pushSprite(x, y);
-    sprite.deleteSprite();
+    if (dst)
+    {
+        if (received == totalBytes)
+            sprite.pushSprite(x, y);
+        sprite.deleteSprite();
+    }
 }

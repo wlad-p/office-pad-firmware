@@ -8,6 +8,9 @@ static const char ELLIPSIS[] = "\xE2\x80\xA6";   // "…" in UTF-8
 
 void MediaPage::drawStaticLayout()
 {
+    Serial.println("{\"dbg\":\"static\"}");
+
+
     tft_.fillScreen(Theme::Background);
     lastBarWidth_ = -1;
     lastMinute_ = -1;
